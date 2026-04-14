@@ -25,9 +25,9 @@ export const PLAN_CONFIG = {
   },
   fiveDay: {
     id: "fiveDay",
-    name: "5 Day Pass",
-    amount: 40,
-    durationDays: 5,
+    name: "7 Day Pass",
+    amount: 20,
+    durationDays: 7,
     features: {
       unlimitedScans: true,
       ocr: true,
@@ -37,9 +37,9 @@ export const PLAN_CONFIG = {
   },
   weekly: {
     id: "weekly",
-    name: "Weekly Pass",
+    name: "1 Month Pass",
     amount: 79,
-    durationDays: 7,
+    durationDays: 30,
     features: {
       unlimitedScans: true,
       ocr: true,
@@ -49,9 +49,9 @@ export const PLAN_CONFIG = {
   },
   monthly: {
     id: "monthly",
-    name: "Monthly Pass",
+    name: "3 Month Pass",
     amount: 199,
-    durationDays: 30,
+    durationDays: 90,
     features: {
       unlimitedScans: true,
       ocr: true,

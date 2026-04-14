@@ -13,9 +13,9 @@ export const PLAN_CONFIG = {
   },
   day: {
     id: "day",
-    name: "1 Day Pass",
-    amount: 15,
-    durationDays: 1,
+    name: "3 Day Pass",
+    amount: 10,
+    durationDays: 3,
     features: {
       unlimitedScans: true,
       ocr: true,

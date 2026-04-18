@@ -1,10 +1,8 @@
 import { Router } from "express";
 import { getPlanConfig, PLAN_CONFIG } from "../config/plans.js";
 import { Payment } from "../models/Payment.js";
-import { AccessToken } from "../models/AccessToken.js";
 import { RevokedUTR } from "../models/RevokedUTR.js";
 import { getClientIp } from "../utils/ip.js";
-import { createAccessPayload, signAccessToken } from "../utils/tokens.js";
 
 const router = Router();
 
@@ -41,9 +39,6 @@ router.post("/initiate", async (req, res) => {
     return res.status(409).json({ message: "This UTR already exists" });
   }
 
-  const payload = createAccessPayload(cleanEmail, plan.id);
-  const jwtToken = signAccessToken(payload);
-
   await Payment.create({
     utr: cleanUtr,
     email: cleanEmail,
@@ -53,19 +48,15 @@ router.post("/initiate", async (req, res) => {
     ip: getClientIp(req)
   });
 
-  await AccessToken.create({
-    email: cleanEmail,
-    plan: plan.id,
-    jwtToken,
-    utr: cleanUtr,
-    expiresAt: payload.expiry,
-    isActive: true
-  });
-
   return res.status(201).json({
-    message: "Payment saved as pending. Access granted temporarily.",
-    token: jwtToken,
-    access: payload
+    message: "Payment saved as pending. Admin approval is required before access is unlocked.",
+    status: "pending",
+    payment: {
+      email: cleanEmail,
+      utr: cleanUtr,
+      plan: plan.id,
+      amount: plan.amount
+    }
   });
 });
 

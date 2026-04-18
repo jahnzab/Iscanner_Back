@@ -4,7 +4,7 @@ import { requireAdmin } from "../middleware/auth.js";
 import { AccessToken } from "../models/AccessToken.js";
 import { Payment } from "../models/Payment.js";
 import { RevokedUTR } from "../models/RevokedUTR.js";
-import { signAdminToken } from "../utils/tokens.js";
+import { issueAccessToken, signAdminToken } from "../utils/tokens.js";
 
 const router = Router();
 
@@ -24,17 +24,28 @@ router.get("/payments", requireAdmin, async (_req, res) => {
 });
 
 router.post("/payments/:id/approve", requireAdmin, async (req, res) => {
-  const payment = await Payment.findByIdAndUpdate(
-    req.params.id,
-    { status: "approved" },
-    { new: true }
-  ).lean();
+  const payment = await Payment.findById(req.params.id);
 
   if (!payment) {
     return res.status(404).json({ message: "Payment not found" });
   }
 
-  return res.json({ payment });
+  const { payload, jwtToken } = issueAccessToken(payment.email, payment.plan);
+
+  await AccessToken.deleteMany({ utr: payment.utr });
+  await AccessToken.create({
+    email: payment.email,
+    plan: payment.plan,
+    jwtToken,
+    utr: payment.utr,
+    expiresAt: payload.expiry,
+    isActive: true
+  });
+
+  payment.status = "approved";
+  await payment.save();
+
+  return res.json({ payment: payment.toObject(), access: payload });
 });
 
 router.post("/payments/:id/reject", requireAdmin, async (req, res) => {

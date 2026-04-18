@@ -20,6 +20,15 @@ export function createAccessPayload(email, planId) {
   };
 }
 
+export function issueAccessToken(email, planId) {
+  const payload = createAccessPayload(email, planId);
+
+  return {
+    payload,
+    jwtToken: signAccessToken(payload)
+  };
+}
+
 export function signAccessToken(payload) {
   const expirySeconds = Math.max(
     1,

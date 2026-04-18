@@ -2,6 +2,7 @@ import { Router } from "express";
 import { env } from "../config/env.js";
 import { requireAdmin } from "../middleware/auth.js";
 import { AccessToken } from "../models/AccessToken.js";
+import { FreeUsage } from "../models/FreeUsage.js";
 import { Payment } from "../models/Payment.js";
 import { RevokedUTR } from "../models/RevokedUTR.js";
 import { issueAccessToken, signAdminToken } from "../utils/tokens.js";
@@ -20,7 +21,8 @@ router.post("/login", (req, res) => {
 
 router.get("/payments", requireAdmin, async (_req, res) => {
   const payments = await Payment.find().sort({ createdAt: -1 }).lean();
-  return res.json({ payments });
+  const freeUsages = await FreeUsage.find().sort({ usedAt: -1 }).lean();
+  return res.json({ payments, freeUsages });
 });
 
 router.post("/payments/:id/approve", requireAdmin, async (req, res) => {

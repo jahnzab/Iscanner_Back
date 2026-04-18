@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AccessToken } from "../models/AccessToken.js";
+import { Payment } from "../models/Payment.js";
 import { RevokedUTR } from "../models/RevokedUTR.js";
 import { verifyAccessToken } from "../utils/tokens.js";
 
@@ -48,7 +49,18 @@ router.post("/recover", async (req, res) => {
     .lean();
 
   if (!access) {
-    return res.status(404).json({ message: "No active access found" });
+    const payment = await Payment.findOne({ email: String(email).trim().toLowerCase() })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!payment) {
+      return res.status(404).json({ message: "No payment found for that email" });
+    }
+
+    return res.json({
+      paymentStatus: payment.status,
+      payment
+    });
   }
 
   const payload = verifyAccessToken(access.jwtToken);
